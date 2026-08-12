@@ -1,0 +1,20 @@
+{
+  "name": "21-building-complete-backend",
+  "version": "1.0.0",
+  "description": "a project managment application ",
+  "keywords": [
+    "backend",
+    "API",
+    "creation"
+  ],
+  "license": "ISC",
+  "author": "David Gvenetadze",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js"
+  },
+  "devDependencies": {
+    "prettier": "3.9.6"
+  }
+}
