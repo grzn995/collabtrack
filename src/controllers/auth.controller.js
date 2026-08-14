@@ -5,7 +5,7 @@ import { asyncHandler } from "../utils/asynchandler.js"
 import { emailVerificationMailgenContent, sendEmail } from "../utils/mail.js"
 
 
-const generatAccessTokenAndRefreshToken = async (userId) => {
+const generateAccessTokenAndRefreshToken = async (userId) => {
 
   try {
     const user = await User.findById(userId);
@@ -55,7 +55,7 @@ const registerUser = asyncHandler(async (req,res) =>{
       subject : "Please verify your E-mail",
       mailgenContent : emailVerificationMailgenContent(
         user.username,
-        `${req.protoocol.}://${req.get("host")}/api/v1/users/verify-email/${unHashedToken}`
+        `${req.protoocol}://${req.get("host")}/api/v1/users/verify-email/${unHashedToken}`
       ),
     })
   const createdUser = await User.findById(user._id).select(
