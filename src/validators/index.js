@@ -25,3 +25,29 @@ export const userLoginValidator = () => {
 }
 
 
+export const userChangeCurrentPasswordValidator = () => {
+  return [
+    body("oldPassword").notEmpty().withMessage("Old password cannot be empty"),
+    body("newPassword").notEmpty().withMessage("New password cannot be empty")
+  ]
+
+
+
+}
+
+
+export const userForgotPasswordValidator = () => {
+
+  return [
+    body("email").notEmpty().withMessage("Email is required").isEmail().withMessage("Email is invalid")
+  ]
+
+}
+
+
+export const userResetForgotPasswordValidator = () => {
+  return [
+    body("newPassword").notEmpty().withMessage("New password cannot be empty")
+  ]
+}
+
