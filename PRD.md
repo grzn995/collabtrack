@@ -127,7 +127,7 @@ Project Camp Backend is a RESTful API service designed to support collaborative 
 #### 4.2 Permission Matrix
 
 | Feature                    | Admin | Project Admin | Member |
-| -------------------------- | ----- | ------------- | ------ |
+|----------------------------|-------|---------------|--------|
 | Create Project             | ✓     | ✗             | ✗      |
 | Update/Delete Project      | ✓     | ✗             | ✗      |
 | Manage Project Members     | ✓     | ✗             | ✗      |
