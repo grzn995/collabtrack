@@ -7,11 +7,65 @@ import { emailVerificationMailgenContent, sendEmail } from "../utils/mail.js"
 import {Project} from "../models/project.models.js"
 import {ProjectMember} from "../models/projectmember.models.js"
 import { UserRolesEnum } from "../utils/constants.js"
+import { pipeline } from "nodemailer/lib/xoauth2"
 
 
 
 
-const getProject = asyncHandler(async (res,req) => {})
+const getProject = asyncHandler(async (res,req) => {
+  const projects = await ProjectMember.aggregate([
+      {
+        $match : {
+          user : new mongoose.Types.ObjectId(req.user._id)
+        }
+      },
+    {
+      $lookup : {
+        from : "projects",
+        localField : "projects",
+        foreignField : "_id",
+        as : "projects",
+        pipeline : [
+          {
+            $lookup : {
+              from : "projectMembers",
+              localField : "_id",
+              foreignField : "projects",
+              as : "projectMembers"
+            }
+          },
+          {
+            $addFields : {
+              members : {
+                $size: "$projectMembers"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      $unwind : "$project"
+    },
+    {
+      $project : {
+        project : {
+          _id : 1,
+          name : 1,
+          description : 1,
+          members : 1,
+          createdAt : 1,
+          createdBy : 1
+        },
+        role : 1,
+        _id : 0
+      }
+    }
+    
+  ])
+  return res.status(200).json(new ApiResponse(200,projects,"Projects fetched successfully"))
+
+})
 const getProjectById = asyncHandler(async (res,req) => {})
 const createProject = asyncHandler(async (res,req) => {
   const {name,description} = req,body
