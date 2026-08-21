@@ -1,4 +1,4 @@
-import {User} from "a../models/user.models.js"
+import {User} from "../models/user.models.js"
 import mongoose from "mongoose"
 import { ApiResponse } from "../utils/api-response.js"
 import {ApiError } from "../utils/api-error.js"
@@ -7,12 +7,11 @@ import { emailVerificationMailgenContent, sendEmail } from "../utils/mail.js"
 import {Project} from "../models/project.models.js"
 import {ProjectMember} from "../models/projectmember.models.js"
 import { AvailableUserRole, UserRolesEnum } from "../utils/constants.js"
-import { pipeline } from "nodemailer/lib/xoauth2"
 
 
 
 
-const getProject = asyncHandler(async (res,req) => {
+const getProject = asyncHandler(async (req,res) => {
   const projects = await ProjectMember.aggregate([
       {
         $match : {
@@ -22,15 +21,15 @@ const getProject = asyncHandler(async (res,req) => {
     {
       $lookup : {
         from : "projects",
-        localField : "projects",
+        localField : "project",
         foreignField : "_id",
-        as : "projects",
+        as : "project",
         pipeline : [
           {
             $lookup : {
-              from : "projectMembers",
+              from : "projectmembers",
               localField : "_id",
-              foreignField : "projects",
+              foreignField : "project",
               as : "projectMembers"
             }
           },
@@ -66,7 +65,7 @@ const getProject = asyncHandler(async (res,req) => {
   return res.status(200).json(new ApiResponse(200,projects,"Projects fetched successfully"))
 
 })
-const getProjectById = asyncHandler(async (res,req) => {
+const getProjectById = asyncHandler(async (req,res) => {
   const {projectId} = req.params
 
   const project = await Project.findById(projectId)
@@ -79,8 +78,8 @@ const getProjectById = asyncHandler(async (res,req) => {
 
 
 })
-const createProject = asyncHandler(async (res,req) => {
-  const {name,description} = req,body
+const createProject = asyncHandler(async (req,res) => {
+  const {name,description} = req.body
   const project = await Project.create({
     name,
     description,
@@ -98,11 +97,11 @@ const createProject = asyncHandler(async (res,req) => {
 
 
 })
-const updateProject = asyncHandler(async (res,req) => {
+const updateProject = asyncHandler(async (req,res) => {
   const {name, description} = req.body
   const {projectId} = req.params
   
-  const project = await Project.findByIdAndDelete(projectId, {name, description},{new : true})
+  const project = await Project.findByIdAndUpdate(projectId, {name, description},{new : true})
   if(!project){
     throw new ApiError(404,"Project not found")
   }
@@ -112,7 +111,7 @@ const updateProject = asyncHandler(async (res,req) => {
 
 
 })
-const deleteProject = asyncHandler(async (res,req) => {
+const deleteProject = asyncHandler(async (req,res) => {
   const {projectId} =  req.params
   const project = await Project.findByIdAndDelete(projectId)
   if(!project){
@@ -125,7 +124,7 @@ const deleteProject = asyncHandler(async (res,req) => {
 
 
 })
-const addMembersToProject= asyncHandler(async (res,req) => {
+const addMembersToProject= asyncHandler(async (req,res) => {
   const {email,role} = req.body
   const {projectId}  = req.params
   
@@ -133,7 +132,7 @@ const addMembersToProject= asyncHandler(async (res,req) => {
   if(!user){
     throw new ApiError(404,"User not found")
   }
-  await ProjectMember.findByIdAndUpdate(
+  await ProjectMember.findOneAndUpdate(
     {
     user : new mongoose.Types.ObjectId(user._id),
     project : new mongoose.Types.ObjectId(projectId)
@@ -153,10 +152,10 @@ const addMembersToProject= asyncHandler(async (res,req) => {
   
 
 })
-const getProjectMembers = asyncHandler(async (res,req) => {
+const getProjectMembers = asyncHandler(async (req,res) => {
   const {projectId} = req.params
 
-  const project = await Project.findById(req.params)
+  const project = await Project.findById(projectId)
 
   if(!project){
     throw new ApiError(404,"Project not found")
@@ -212,7 +211,7 @@ const getProjectMembers = asyncHandler(async (res,req) => {
 
 
 })
-const updateMemberRole = asyncHandler(async (res,req) => {
+const updateMemberRole = asyncHandler(async (req,res) => {
   const { projectId, userId} = req.params
   const {newRole} = req.body
 
@@ -244,7 +243,7 @@ const updateMemberRole = asyncHandler(async (res,req) => {
 
 
 })
-const deleteMember = asyncHandler(async (res,req) => {
+const deleteMember = asyncHandler(async (req,res) => {
   const { projectId, userId} = req.params
 
   let projectMember = await ProjectMember.findOne({
@@ -260,7 +259,7 @@ const deleteMember = asyncHandler(async (res,req) => {
   if(!projectMember){
     throw new ApiError(404, "Project member not found")
   }
-  return res.status(200).json(new ApiResponse(200,projectMember,"Project deleted successfully"))
+  return res.status(200).json(new ApiResponse(200,projectMember,"Project member deleted successfully"))
 
 })
 
