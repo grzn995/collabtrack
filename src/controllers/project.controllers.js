@@ -117,9 +117,12 @@ const deleteProject = asyncHandler(async (req,res) => {
   if(!project){
     throw new ApiError(404,"Project not found")
   }
+  await ProjectMember.deleteMany({ project: projectId })
   return res.status(200).json(
-    new ApiResponse(200,project,"Project deleted successfully")
+    new ApiResponse(200, project, "Project deleted successfully")
   )
+
+
   
 
 
@@ -131,6 +134,12 @@ const addMembersToProject= asyncHandler(async (req,res) => {
   const user = await User.findOne({email})
   if(!user){
     throw new ApiError(404,"User not found")
+  }
+  const project = await Project.findById(projectId)
+  
+  if(!project){
+    throw new ApiError(404, "Project not found")
+  
   }
   await ProjectMember.findOneAndUpdate(
     {
