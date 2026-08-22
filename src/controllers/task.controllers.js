@@ -34,8 +34,8 @@ const createTask= asyncHandler(async(req,res)=>{
 
   const attachments = files.map((file) => {
     return {
-      url : `${process.env.SERVER_URL}/images/${file.originalName}`,
-      mimetype : file.mimetype,
+      url : `${process.env.SERVER_URL}/images/${file.originalname}`,
+      mimeType : file.mimetype,
       size : file.size
     }
   })
@@ -55,7 +55,85 @@ const createTask= asyncHandler(async(req,res)=>{
 
 
 })
-const getTaskById= asyncHandler(async(req,res)=>{})
+const getTaskById= asyncHandler(async(req,res)=>{
+  const {taskId} = req.params
+  const task = await Task.aggregate([
+    {
+      $match: {
+        _id : new mongoose.Types.ObjectId(taskId)
+      }
+    },
+    {
+      $lookup : {
+        from : "users",
+        localField : "assignedTo",
+        foreignField : "_id",
+        as : "assignedTo",
+        pipeline : [
+          {
+            $project:{
+              _id: 1,
+              username: 1,
+              fullName : 1,
+              avatar : 1
+              
+            }
+          }
+        ]
+      }
+    },
+    {
+      $lookup : {
+        from:"subtasks",
+        localField: "_id",
+        foreignField: "task",
+        as:"subtasks",
+        pipeline:[
+          {
+            $lookup: {
+              from : "users",
+              localField : "createdBy",
+              foreignField: "_id",
+              as: "createdBy",
+              pipeline:[
+                {
+                  $project : {
+                    _id : 1,
+                    username : 1,
+                    fullName : 1,
+                    avatar : 1
+                  }
+                }
+              ]
+            }
+          },
+          {
+            $addFields : {
+              createdBy: {
+                $arrayElemAt : ["$createdBy", 0]
+              }
+            }
+          }
+        ]
+      },
+    },
+    {
+      $addFields : {
+        assignedTo : {
+          $arrayElemAt : ["$assignedTo",0]
+        }
+      }
+    }
+
+  ])
+  if(!task || task.length == 0){
+    throw new ApiError(404,"Task not found ")
+  }
+
+  return res.status(200).json(new ApiResponse(200,task[0],"Task fetched successfully"))
+  
+
+})
 const deleteTask= asyncHandler(async(req,res)=>{})
 const updateTask= asyncHandler(async(req,res)=>{})
 const createSubtask= asyncHandler(async(req,res)=>{})

@@ -1,9 +1,9 @@
 import {User} from "../models/user.models.js"
+import crypto from "crypto"
 import { ApiResponse } from "../utils/api-response.js"
 import {ApiError } from "../utils/api-error.js"
 import { asyncHandler } from "../utils/asynchandler.js"
 import { emailVerificationMailgenContent, sendEmail } from "../utils/mail.js"
-import cookieParser from "cookie-parser"
 
 
 const generateAccessTokenAndRefreshToken = async (userId) => {
@@ -131,7 +131,7 @@ const verifyEmail = asyncHandler(async(req,res) => {
   
   let hashedToken = crypto.createHash("sha256").update(verificationToken).digest("hex")
 
-  const user = User.findOne({
+  const user = await User.findOne({
     emailVerificationToken : hashedToken,
     emailVerificationExpiry : {$gt: Date.now()}
   })

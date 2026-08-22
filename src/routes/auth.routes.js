@@ -11,10 +11,10 @@ const authRouter = Router()
 
 authRouter.route("/register").post(userRegisterValidator() , validate, registerUser)
 authRouter.route("/login").post(userLoginValidator(), validate, login)
-authRouter.route("verify-email/:verificationToken").get(verifyEmail)
+authRouter.route("/verify-email/:verificationToken").get(verifyEmail)
 authRouter.route("/refresh-token").post(refreshAccessToken)
 authRouter.route("/forgot-password").post(userForgotPasswordValidator(),validate,forgotPasswordRequest)
-authRouter.route("/reset-password:resetToken").post(userResetForgotPasswordValidator(),validate,resetForgotPassword)
+authRouter.route("/reset-password/:resetToken").post(userResetForgotPasswordValidator(),validate,resetForgotPassword)
 
 //secure routes
 authRouter.route("/logout").post(verifyJWT, logout)
