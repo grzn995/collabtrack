@@ -102,3 +102,13 @@ export const updateSubtaskValidator = () => {
   ]
 }
 
+export const createNoteValidator = () => {
+  return [
+    body("content").trim().notEmpty().withMessage("Content is required")
+  ]
+}
+export const updateNoteValidator= () => {
+  return [
+    body("content").trim().notEmpty().withMessage("Content is required")
+  ]
+}
