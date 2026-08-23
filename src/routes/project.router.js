@@ -21,7 +21,7 @@ projectRouter.route("/:projectId").get(validateProjectPermission(AvailableUserRo
 
 
 
-projectRouter.route("/:projectId/members").get(getProjectMembers).post(validateProjectPermission([UserRolesEnum.ADMIN]),addMemberToProjectValidator(),validate,addMembersToProject)
+projectRouter.route("/:projectId/members").get(validateProjectPermission(AvailableUserRole),getProjectMembers).post(validateProjectPermission([UserRolesEnum.ADMIN]),addMemberToProjectValidator(),validate,addMembersToProject)
 
 projectRouter.route("/:projectId/members/:userId").put(validateProjectPermission([UserRolesEnum.ADMIN]),updateMemberRole).delete(validateProjectPermission([UserRolesEnum.ADMIN]),deleteMember)
 
