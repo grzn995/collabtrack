@@ -1,7 +1,7 @@
 {
   "name": "collabtrack-backend",
   "version": "1.0.0",
-  "description": "a project managment application ",
+  "description": "A project management REST API with JWT auth, RBAC, and hierarchical project/task/subtask/note management.",
   "keywords": [
     "backend",
     "API",
