@@ -134,11 +134,100 @@ const getTaskById= asyncHandler(async(req,res)=>{
   
 
 })
-const deleteTask= asyncHandler(async(req,res)=>{})
-const updateTask= asyncHandler(async(req,res)=>{})
-const createSubtask= asyncHandler(async(req,res)=>{})
-const updateSubtask= asyncHandler(async(req,res)=>{})
-const deleteSubtask= asyncHandler(async(req,res)=>{})
+const deleteTask= asyncHandler(async(req,res)=>{
+  const {taskId} = req.params
+
+  const task = await Task.findById(taskId)
+  
+  if(!task) throw new ApiError(404,"Task not found")
+
+  await Subtask.deleteMany({task:taskId})
+
+  await Task.findByIdAndDelete(taskId)
+
+  return res.status(200).json(new ApiResponse(200,task,"Task deleted successfully"))
+
+})
+const updateTask= asyncHandler(async(req,res)=>{
+  const {taskId} = req.params
+  const {title,description,assignedTo,status} = req.body
+  
+  const task = await Task.findById(taskId)
+
+
+  if(!task){
+    throw new ApiError(404,"Task not found")
+  }
+
+  const files = req.files || []
+
+  const newAttachments = files.map((file)=>{
+    return {
+      url : `${process.env.SERVER_URL}/images/${file.originalname}`,
+      mimeType : file.mimetype,
+      size : file.size
+
+    }
+  })
+
+  task.attachments = [...task.attachments,...newAttachments]
+  if(title) task.title = title
+  if(description) task.description = description
+  if(assignedTo) task.assignedTo = new mongoose.Types.ObjectId(assignedTo)
+  if(status) task.status = status
+
+  await task.save()
+
+  return res.status(200).json(new ApiResponse(200,task,"Task updated successfully")) 
+
+
+})
+const createSubtask= asyncHandler(async(req,res)=>{
+  const {taskId} = req.params
+  const {title} = req.body
+
+  const parentTask = await Task.findById(taskId)
+
+  if(!parentTask) throw new ApiError(404,"Parent Task for Subtask not found")
+
+  const subtask = await Subtask.create({title,task: taskId,createdBy: req.user._id})
+
+  return res.status(201).json(new ApiResponse(201,subtask,"Subtask created successfully"))
+
+})
+const updateSubtask= asyncHandler(async(req,res)=>{
+  const {subTaskId} = req.params
+  const {title,isCompleted} = req.body
+
+  const subtask = await Subtask.findById(subTaskId)
+
+  if(!subtask) throw new ApiError(404,"Subtask not found")
+
+
+  if(title) subtask.title = title
+  if(isCompleted !== undefined) subtask.isCompleted= isCompleted
+
+
+  await subtask.save()
+
+  return res.status(200).json(new ApiResponse(200,subtask,"Subtask updated successfully"))
+
+
+  
+
+})
+const deleteSubtask= asyncHandler(async(req,res)=>{
+  const {subTaskId} = req.params
+
+  const subtask = await Subtask.findById(subTaskId)
+
+  if(!subtask) throw new ApiError(404,"Subtask not found")
+
+  await Subtask.findByIdAndDelete(subTaskId)
+  
+  return res.status(200).json(new ApiResponse(200,subtask,"Subtask deleted successfully"))
+
+})
 
 
 

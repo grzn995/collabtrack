@@ -1,9 +1,10 @@
 import {User} from "../models/user.models.js"
 import crypto from "crypto"
+import jwt from "jsonwebtoken"
 import { ApiResponse } from "../utils/api-response.js"
 import {ApiError } from "../utils/api-error.js"
 import { asyncHandler } from "../utils/asynchandler.js"
-import { emailVerificationMailgenContent, sendEmail } from "../utils/mail.js"
+import { emailVerificationMailgenContent, forgotPasswordMailgenContent, sendEmail } from "../utils/mail.js"
 
 
 const generateAccessTokenAndRefreshToken = async (userId) => {
@@ -155,7 +156,7 @@ const resendEmailVerification = asyncHandler(async(req,res) => {
   if(!user){
     throw new ApiError(404, {},"User does not exist")
   }
-  if(!user.isEmailVerified){
+  if(user.isEmailVerified){
     throw new ApiError(409,"Email is already verified")
   }
   const {unHashedToken, hashedToken, tokenExpiry} = user.generateTemporaryToken();
