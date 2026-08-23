@@ -27,6 +27,7 @@ import{authRouter} from "./routes/auth.routes.js"
 import { projectRouter } from "./routes/project.routes.js"
 import { taskRouter } from "./routes/task.routes.js"
 import { noteRouter } from "./routes/note.routes.js"
+import { errorHandler } from "./middlewares/error.middleware.js"
 
 
 app.use("/api/v1/auth",authRouter)
@@ -38,4 +39,7 @@ app.use("/api/v1/notes",noteRouter)
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
+
+app.use(errorHandler)
+
 export default app;
