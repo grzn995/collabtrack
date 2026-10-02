@@ -51,7 +51,7 @@ const registerUser = asyncHandler(async (req,res) =>{
       subject : "Please verify your E-mail",
       mailgenContent : emailVerificationMailgenContent(
         user.username,
-        `${req.protocol}://${req.get("host")}/api/v1/users/verify-email/${unHashedToken}`
+        `${req.protocol}://${req.get("host")}/api/v1/auth/verify-email/${unHashedToken}`
       ),
     })
   const createdUser = await User.findById(user._id).select(
@@ -171,7 +171,7 @@ const resendEmailVerification = asyncHandler(async(req,res) => {
       subject : "Please verify your E-mail",
       mailgenContent : emailVerificationMailgenContent(
         user.username,
-        `${req.protocol}://${req.get("host")}/api/v1/users/verify-email/${unHashedToken}`
+        `${req.protocol}://${req.get("host")}/api/v1/auth/verify-email/${unHashedToken}`
       ),
     })
   return res.status(200).json(

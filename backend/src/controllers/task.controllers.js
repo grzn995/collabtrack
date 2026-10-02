@@ -34,7 +34,7 @@ const createTask= asyncHandler(async(req,res)=>{
 
   const attachments = files.map((file) => {
     return {
-      url : `${process.env.SERVER_URL}/images/${file.originalname}`,
+      url : `${process.env.SERVER_URL}/images/${file.filename}`,
       mimeType : file.mimetype,
       size : file.size
     }
@@ -56,11 +56,12 @@ const createTask= asyncHandler(async(req,res)=>{
 
 })
 const getTaskById= asyncHandler(async(req,res)=>{
-  const {taskId} = req.params
+  const {projectId,taskId} = req.params
   const task = await Task.aggregate([
     {
       $match: {
-        _id : new mongoose.Types.ObjectId(taskId)
+        _id : new mongoose.Types.ObjectId(taskId),
+        project : new mongoose.Types.ObjectId(projectId)
       }
     },
     {
@@ -135,9 +136,9 @@ const getTaskById= asyncHandler(async(req,res)=>{
 
 })
 const deleteTask= asyncHandler(async(req,res)=>{
-  const {taskId} = req.params
+  const {projectId,taskId} = req.params
 
-  const task = await Task.findById(taskId)
+  const task = await Task.findOne({_id : taskId, project : projectId})
   
   if(!task) throw new ApiError(404,"Task not found")
 
@@ -149,10 +150,10 @@ const deleteTask= asyncHandler(async(req,res)=>{
 
 })
 const updateTask= asyncHandler(async(req,res)=>{
-  const {taskId} = req.params
+  const {projectId,taskId} = req.params
   const {title,description,assignedTo,status} = req.body
   
-  const task = await Task.findById(taskId)
+  const task = await Task.findOne({_id : taskId, project : projectId})
 
 
   if(!task){
@@ -163,7 +164,7 @@ const updateTask= asyncHandler(async(req,res)=>{
 
   const newAttachments = files.map((file)=>{
     return {
-      url : `${process.env.SERVER_URL}/images/${file.originalname}`,
+      url : `${process.env.SERVER_URL}/images/${file.filename}`,
       mimeType : file.mimetype,
       size : file.size
 
@@ -183,10 +184,10 @@ const updateTask= asyncHandler(async(req,res)=>{
 
 })
 const createSubtask= asyncHandler(async(req,res)=>{
-  const {taskId} = req.params
+  const {projectId,taskId} = req.params
   const {title} = req.body
 
-  const parentTask = await Task.findById(taskId)
+  const parentTask = await Task.findOne({_id : taskId, project : projectId})
 
   if(!parentTask) throw new ApiError(404,"Parent Task for Subtask not found")
 
@@ -196,12 +197,17 @@ const createSubtask= asyncHandler(async(req,res)=>{
 
 })
 const updateSubtask= asyncHandler(async(req,res)=>{
-  const {subTaskId} = req.params
+  const {projectId,subTaskId} = req.params
   const {title,isCompleted} = req.body
 
   const subtask = await Subtask.findById(subTaskId)
 
   if(!subtask) throw new ApiError(404,"Subtask not found")
+
+  //the subtask has no project field, so check that its parent task belongs to this project
+  const parentTask = await Task.findOne({_id : subtask.task, project : projectId})
+
+  if(!parentTask) throw new ApiError(404,"Subtask not found")
 
 
   if(title) subtask.title = title
@@ -217,11 +223,16 @@ const updateSubtask= asyncHandler(async(req,res)=>{
 
 })
 const deleteSubtask= asyncHandler(async(req,res)=>{
-  const {subTaskId} = req.params
+  const {projectId,subTaskId} = req.params
 
   const subtask = await Subtask.findById(subTaskId)
 
   if(!subtask) throw new ApiError(404,"Subtask not found")
+
+  //the subtask has no project field, so check that its parent task belongs to this project
+  const parentTask = await Task.findOne({_id : subtask.task, project : projectId})
+
+  if(!parentTask) throw new ApiError(404,"Subtask not found")
 
   await Subtask.findByIdAndDelete(subTaskId)
   

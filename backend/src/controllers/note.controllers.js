@@ -47,18 +47,18 @@ const createNote = asyncHandler(async(req,res)=>{
 
 })
 const updateNote = asyncHandler(async(req,res)=>{
-  const {noteId} = req.params
+  const {projectId,noteId} = req.params
   const {content} = req.body
-  let projectNote = await ProjectNote.findById(noteId)
+  let projectNote = await ProjectNote.findOne({_id : noteId, project : projectId})
   if(!projectNote) throw new ApiError(404,"Project note not found")
   projectNote.content = content
   await projectNote.save()
   return res.status(200).json(new ApiResponse(200,projectNote,"Project note updated successfully"))
 })
 const deleteNote = asyncHandler(async(req,res)=>{
-  const {noteId} = req.params
+  const {projectId,noteId} = req.params
 
-  const projectNote = await ProjectNote.findById(noteId)
+  const projectNote = await ProjectNote.findOne({_id : noteId, project : projectId})
 
   if(!projectNote) throw new ApiError(404,"Project note not found")
   
